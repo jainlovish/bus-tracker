@@ -21,10 +21,11 @@
 <script>
     let intervalId;
     let activeBusId = null;
+    const BASE_URL = window.location.origin;
 
     // ✅ Load routes on page load
     window.onload = function () {
-        fetch("http://localhost:8080/api/routes/all")
+        fetch(`${BASE_URL}/api/routes/all`)
             .then(res => res.json())
             .then(data => {
                 const dropdown = document.getElementById("routeSelect");
@@ -68,7 +69,7 @@
                     timestamp: new Date().toISOString()
                 };
 
-                fetch("http://localhost:8080/api/location", {
+                fetch(`${BASE_URL}/api/location`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

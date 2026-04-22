@@ -65,13 +65,15 @@
 
 <script>
 
+    const BASE_URL = window.location.origin;
+
     // Load Schools on page load
     window.onload = function () {
         loadSchools();
     };
 
     function loadSchools() {
-        fetch("http://localhost:8080/api/schools")
+        fetch(`${BASE_URL}/api/schools`)
             .then(res => res.json())
             .then(data => {
                 const schoolSelect = document.getElementById("school");
@@ -89,7 +91,7 @@
 
         if (!schoolId) return;
 
-        fetch(`http://localhost:8080/api/routes?schoolId=${schoolId}`)
+        fetch(`${BASE_URL}/api/routes?schoolId=${schoolId}`)
             .then(res => res.json())
             .then(data => {
                 const routeSelect = document.getElementById("route");
@@ -113,7 +115,7 @@
 
         if (!routeId) return;
 
-        fetch(`http://localhost:8080/api/stops/by-route?routeId=${routeId}`)
+        fetch(`${BASE_URL}/api/stops/by-route?routeId=${routeId}`)
             .then(res => res.json())
             .then(data => {
                 const stopSelect = document.getElementById("stop");
