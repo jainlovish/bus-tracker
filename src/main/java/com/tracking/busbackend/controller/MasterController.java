@@ -35,4 +35,9 @@ public class MasterController {
         return routeRepo.findBySchoolId(schoolId);
     }
 
+    @GetMapping("/routes/{id}")
+    public Route getRouteById(@PathVariable Long id){
+        return routeRepo.findById(id).get();
+    }
+
 }
