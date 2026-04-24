@@ -30,9 +30,6 @@ public class LocationController {
     private RouteRepo routeRepo;
 
     @Autowired
-    private StopRepo stopRepo;
-
-    @Autowired
     private DriverRepository driverRepository;
 
     // ✅ DRIVER SENDS LOCATION
@@ -42,7 +39,10 @@ public class LocationController {
         Driver driver = driverRepository.findById(request.getDriverId())
                 .orElseThrow(() -> new RuntimeException("Invalid driver"));
 
-        String busId = driver.getRouteId().toString();
+        Route route = routeRepo.findById(driver.getRouteId())
+                .orElseThrow(() -> new RuntimeException("Route not found"));
+
+        String busId = route.getBusId();
 
         busLocationMap.put(busId, request);
 
@@ -58,31 +58,5 @@ public class LocationController {
     @GetMapping("/location/{busId}")
     public ResponseEntity<LocationRequest> getLocation(@PathVariable String busId) {
         return ResponseEntity.ok(busLocationMap.get(busId));
-    }
-
-    // ✅ GET STOPS USING BUS ID (MAIN FIX)
-    @GetMapping("/stops/by-bus/{busId}")
-    public ResponseEntity<List<Stop>> getStopsByBus(@PathVariable String busId) {
-
-        Route route = routeRepo.findByBusId(busId);
-
-        if (route == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        List<Stop> stops = stopRepo.findByRouteIdOrderBySequenceNo(route.getId());
-
-        return ResponseEntity.ok(stops);
-    }
-
-    // ✅ FOR HOMEPAGE DROPDOWN
-    @GetMapping("/stops/by-route")
-    public List<Stop> getStopsByRoute(@RequestParam Long routeId) {
-        return stopRepo.findByRouteIdOrderBySequenceNo(routeId);
-    }
-
-    @GetMapping("/routes/all")
-    public List<Route> getAllRoutes() {
-        return routeRepo.findAll();
     }
 }
