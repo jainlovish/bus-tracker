@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class LocationRequest {
-    private long driverId;
-    private double lat;
-    private double lng;
-    private String timestamp;
+public class LoginRequest {
+    private String username; // mobile or email
+    private String password;
 }

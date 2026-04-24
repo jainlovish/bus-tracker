@@ -1,8 +1,10 @@
 package com.tracking.busbackend.controller;
 
+import com.tracking.busbackend.entity.Driver;
 import com.tracking.busbackend.model.LocationRequest;
 import com.tracking.busbackend.entity.Route;
 import com.tracking.busbackend.entity.Stop;
+import com.tracking.busbackend.repository.DriverRepository;
 import com.tracking.busbackend.repository.RouteRepo;
 import com.tracking.busbackend.repository.StopRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,22 +32,22 @@ public class LocationController {
     @Autowired
     private StopRepo stopRepo;
 
+    @Autowired
+    private DriverRepository driverRepository;
+
     // ✅ DRIVER SENDS LOCATION
     @PostMapping("/location")
     public ResponseEntity<?> updateLocation(@RequestBody LocationRequest request) {
 
-        if (request.getBusId() == null || request.getBusId().isEmpty()) {
-            return ResponseEntity.badRequest().body("Bus ID is required");
-        }
+        Driver driver = driverRepository.findById(request.getDriverId())
+                .orElseThrow(() -> new RuntimeException("Invalid driver"));
 
-        System.out.println("Bus: " + request.getBusId()
-                + " Lat: " + request.getLat()
-                + " Lng: " + request.getLng());
+        String busId = driver.getRouteId().toString();
 
-        busLocationMap.put(request.getBusId(), request);
+        busLocationMap.put(busId, request);
 
         messagingTemplate.convertAndSend(
-                "/topic/location/" + request.getBusId(),
+                "/topic/location/" + busId,
                 request
         );
 

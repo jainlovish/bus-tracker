@@ -19,8 +19,11 @@ public class MasterController {
     @Autowired
     private SchoolRepo schoolRepo;
 
-    @Autowired private RouteRepo routeRepo;
-    @Autowired private StopRepo stopRepo;
+    @Autowired
+    private RouteRepo routeRepo;
+
+    @Autowired
+    private StopRepo stopRepo;
 
     @GetMapping("/schools")
     public List<School> getSchools() {
