@@ -1,21 +1,19 @@
-package com.tracking.busbackend.entity;
+package com.tracking.busbackend.model.school;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class Parent {
+public class ModifySchoolReq {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long schoolId;
 
     private String name;
+
+    private String address;
 
     private String email;
 
@@ -24,8 +22,4 @@ public class Parent {
     private String password;
 
     private Boolean isActive;
-
-    @ManyToOne
-    @JoinColumn(name = "school_id")
-    private School school;
 }

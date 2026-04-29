@@ -1,15 +1,19 @@
 package com.tracking.busbackend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class Stop {
+@Getter
+public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,13 +21,9 @@ public class Stop {
 
     private String name;
 
-    private double lat;
+    private String email;
 
-    private double lng;
+    private String mobile;
 
-    private int sequenceNo;
-
-    @ManyToOne
-    @JoinColumn(name = "route_id")
-    private Route route;
+    private String password;
 }

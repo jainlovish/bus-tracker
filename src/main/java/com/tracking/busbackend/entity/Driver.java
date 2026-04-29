@@ -1,9 +1,6 @@
 package com.tracking.busbackend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,10 +16,18 @@ public class Driver {
     private Long id;
 
     private String name;
+
     private String mobile;
+
     private String email;
+
     private String password;
-    private boolean isActive;
+
+    private Boolean isActive;
 
     private Long routeId;
+
+    @ManyToOne
+    @JoinColumn(name = "school_id")
+    private School school;
 }

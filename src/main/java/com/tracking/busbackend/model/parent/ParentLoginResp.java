@@ -1,4 +1,4 @@
-package com.tracking.busbackend.model;
+package com.tracking.busbackend.model.parent;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

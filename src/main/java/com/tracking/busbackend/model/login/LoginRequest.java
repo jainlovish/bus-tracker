@@ -1,13 +1,13 @@
-package com.tracking.busbackend.model;
+package com.tracking.busbackend.model.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class ParentLoginReq {
-    private String username; // email OR mobile
+public class LoginRequest {
+    private String username; // mobile or email
     private String password;
 }

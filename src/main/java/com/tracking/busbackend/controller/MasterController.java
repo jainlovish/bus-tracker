@@ -1,8 +1,6 @@
 package com.tracking.busbackend.controller;
 
-import com.tracking.busbackend.entity.Route;
-import com.tracking.busbackend.entity.School;
-import com.tracking.busbackend.entity.Stop;
+import com.tracking.busbackend.entity.*;
 import com.tracking.busbackend.repository.RouteRepo;
 import com.tracking.busbackend.repository.SchoolRepo;
 import com.tracking.busbackend.repository.StopRepo;
@@ -10,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -27,23 +26,28 @@ public class MasterController {
     private StopRepo stopRepo;
 
     @GetMapping("/schools")
-    public List<School> getSchools() {
-        return schoolRepo.findAll();
+    public ResponseEntity<List<School>> getSchools() {
+        return ResponseEntity.ok(schoolRepo.findAll());
     }
 
-    @GetMapping("/routes")
-    public List<Route> getRoutes(@RequestParam Long schoolId) {
-        return routeRepo.findBySchoolId(schoolId);
+    @GetMapping("/routes-by-school")
+    public ResponseEntity<List<Route>> getRoutesBySchool(@RequestParam Long schoolId) {
+
+        schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
+
+        return ResponseEntity.ok(routeRepo.findBySchoolId(schoolId));
     }
 
-    @GetMapping("/routes/{id}")
-    public Route getRouteById(@PathVariable Long id){
-        return routeRepo.findById(id).get();
+    @GetMapping("/route/{id}")
+    public ResponseEntity<Route> getRouteById(@PathVariable Long id){
+
+        Route route = routeRepo.findById(id).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
+
+        return ResponseEntity.ok(route);
     }
 
-    // ✅ GET STOPS USING BUS ID (MAIN FIX)
-    @GetMapping("/stops/by-bus/{busId}")
-    public ResponseEntity<List<Stop>> getStopsByBus(@PathVariable String busId) {
+    @GetMapping("/stops-by-bus")
+    public ResponseEntity<List<Stop>> getStopsByBus(@RequestParam String busId) {
 
         Route route = routeRepo.findByBusId(busId);
 
@@ -56,15 +60,28 @@ public class MasterController {
         return ResponseEntity.ok(stops);
     }
 
-    // ✅ FOR HOMEPAGE DROPDOWN
-    @GetMapping("/stops/by-route")
-    public List<Stop> getStopsByRoute(@RequestParam Long routeId) {
-        return stopRepo.findByRouteIdOrderBySequenceNo(routeId);
+    @GetMapping("/stops-by-route")
+    public ResponseEntity<List<Stop>> getStopsByRoute(@RequestParam Long routeId) {
+
+        routeRepo.findById(routeId).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
+
+        return ResponseEntity.ok(stopRepo.findByRouteIdOrderBySequenceNo(routeId));
     }
 
-    @GetMapping("/routes/all")
-    public List<Route> getAllRoutes() {
-        return routeRepo.findAll();
+    @GetMapping("/drivers-by-school")
+    public ResponseEntity<List<Driver>> getDriversBySchool(@RequestParam Long schoolId){
+
+        School school = schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
+
+        return ResponseEntity.ok(school.getDrivers());
+    }
+
+    @GetMapping("/parents-by-school")
+    public ResponseEntity<List<Parent>> getParentsBySchool(@RequestParam Long schoolId){
+
+        School school = schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
+
+        return ResponseEntity.ok(school.getParents());
     }
 
 }
