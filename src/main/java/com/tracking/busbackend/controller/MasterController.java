@@ -2,10 +2,12 @@ package com.tracking.busbackend.controller;
 
 import com.tracking.busbackend.entity.*;
 import com.tracking.busbackend.model.route.RouteResponse;
+import com.tracking.busbackend.model.school.SchoolResponse;
 import com.tracking.busbackend.model.stop.StopModel;
 import com.tracking.busbackend.repository.RouteRepo;
 import com.tracking.busbackend.repository.SchoolRepo;
 import com.tracking.busbackend.repository.StopRepo;
+import com.tracking.busbackend.util.ConvertorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +30,11 @@ public class MasterController {
     private StopRepo stopRepo;
 
     @GetMapping("/schools")
-    public ResponseEntity<List<School>> getSchools() {
-        return ResponseEntity.ok(schoolRepo.findAll());
+    public ResponseEntity<List<SchoolResponse>> getSchools() {
+
+        List<SchoolResponse> schoolResponses = convertToSchoolResponse(schoolRepo.findAll());
+
+        return ResponseEntity.ok(schoolResponses);
     }
 
     @GetMapping("/routes-by-school")
@@ -37,21 +42,23 @@ public class MasterController {
 
         schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
-        List<RouteResponse> routeResponse = mapRouteResponse(routeRepo.findBySchoolId(schoolId));
+        List<RouteResponse> routeResponse = ConvertorUtils.convertToRouteResponse(routeRepo.findBySchoolId(schoolId));
 
         return ResponseEntity.ok(routeResponse);
     }
 
     @GetMapping("/route/{id}")
-    public ResponseEntity<Route> getRouteById(@PathVariable Long id){
+    public ResponseEntity<RouteResponse> getRouteById(@PathVariable Long id){
 
         Route route = routeRepo.findById(id).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
 
-        return ResponseEntity.ok(route);
+        RouteResponse routeResponse = new RouteResponse(route.getId(), route.getName(), route.getBusId(), route.getPolyline(), route.getSchool().getId(), ConvertorUtils.convertToStopModel(route.getStops()));
+
+        return ResponseEntity.ok(routeResponse);
     }
 
     @GetMapping("/stops-by-bus")
-    public ResponseEntity<List<Stop>> getStopsByBus(@RequestParam String busId) {
+    public ResponseEntity<List<StopModel>> getStopsByBus(@RequestParam String busId) {
 
         Route route = routeRepo.findByBusId(busId);
 
@@ -61,15 +68,21 @@ public class MasterController {
 
         List<Stop> stops = stopRepo.findByRouteIdOrderBySequenceNo(route.getId());
 
-        return ResponseEntity.ok(stops);
+        List<StopModel> stopModelList = ConvertorUtils.convertToStopModel(stops);
+
+        return ResponseEntity.ok(stopModelList);
     }
 
     @GetMapping("/stops-by-route")
-    public ResponseEntity<List<Stop>> getStopsByRoute(@RequestParam Long routeId) {
+    public ResponseEntity<List<StopModel>> getStopsByRoute(@RequestParam Long routeId) {
 
         routeRepo.findById(routeId).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
 
-        return ResponseEntity.ok(stopRepo.findByRouteIdOrderBySequenceNo(routeId));
+        List<Stop> stopsList = stopRepo.findByRouteIdOrderBySequenceNo(routeId);
+
+        List<StopModel> stopModelList = ConvertorUtils.convertToStopModel(stopsList);
+
+        return ResponseEntity.ok(stopModelList);
     }
 
     @GetMapping("/drivers-by-school")
@@ -88,30 +101,15 @@ public class MasterController {
         return ResponseEntity.ok(school.getParents());
     }
 
-    private List<RouteResponse> mapRouteResponse(List<Route> routeList){
+    private List<SchoolResponse> convertToSchoolResponse(List<School> schoolList){
+        List<SchoolResponse> schoolResponses = new ArrayList<>();
 
-        List<RouteResponse> routeResponses = new ArrayList<>();
-        routeList.forEach(r -> {
-              RouteResponse routeResponse = new RouteResponse();
-              routeResponse.setRouteId(r.getId());
-              routeResponse.setName(r.getName());
-              routeResponse.setPolyline(r.getPolyline());
-              routeResponse.setBusId(r.getBusId());
-              routeResponse.setSchoolId(r.getSchool().getId());
-              routeResponse.setStops(convertToStopModel(r.getStops()));
-
-              routeResponses.add(routeResponse);
+        schoolList.forEach(s -> {
+            SchoolResponse schoolResponse = new SchoolResponse(s.getId(), s.getName(), s.getAddress(), s.getEmail(), s.getMobile(), s.getPassword(), s.getIsActive(), ConvertorUtils.convertToRouteResponse(s.getRoutes()));
+            schoolResponses.add(schoolResponse);
         });
-        return routeResponses;
-    }
 
-    private List<StopModel> convertToStopModel(List<Stop> stopList){
-        List<StopModel> stopModelList = new ArrayList<>();
-        stopList.forEach(s -> {
-            StopModel stopModel = new StopModel(s.getName(), s.getLat(), s.getLng(), s.getSequenceNo());
-            stopModelList.add(stopModel);
-        });
-        return stopModelList;
+        return schoolResponses;
     }
 
 }

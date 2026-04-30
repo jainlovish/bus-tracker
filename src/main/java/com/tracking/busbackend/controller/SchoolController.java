@@ -4,8 +4,10 @@ import com.tracking.busbackend.entity.*;
 import com.tracking.busbackend.model.driver.DriverRouteChangeReq;
 import com.tracking.busbackend.model.route.CreateRouteReq;
 import com.tracking.busbackend.model.route.ModifyRouteReq;
+import com.tracking.busbackend.model.route.RouteResponse;
 import com.tracking.busbackend.model.stop.StopModel;
 import com.tracking.busbackend.repository.*;
+import com.tracking.busbackend.util.ConvertorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,7 +82,7 @@ public class SchoolController {
     }
 
     @GetMapping("/school/delete-parent")
-    public ResponseEntity<?> deleteParent(@RequestParam Long parentId) {
+    public ResponseEntity<String> deleteParent(@RequestParam Long parentId) {
 
         parentRepository.findById(parentId).orElseThrow(() -> new RuntimeException("Invalid ParentId"));
 
@@ -90,7 +92,7 @@ public class SchoolController {
     }
 
     @PostMapping("/school/add-route")
-    public ResponseEntity<?> createRoute(@RequestBody CreateRouteReq createRouteReq) {
+    public ResponseEntity<RouteResponse> createRoute(@RequestBody CreateRouteReq createRouteReq) {
 
         School school = schoolRepo.findById(createRouteReq.getSchoolId()).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
@@ -104,11 +106,15 @@ public class SchoolController {
 
         mapStops(route, createRouteReq.getStops());
 
-        return ResponseEntity.ok(routeRepo.save(route));
+        route = routeRepo.save(route);
+
+        RouteResponse routeResponse = new RouteResponse(route.getId(), route.getName(), route.getBusId(), route.getPolyline(), route.getSchool().getId(), ConvertorUtils.convertToStopModel(route.getStops()));
+
+        return ResponseEntity.ok(routeResponse);
     }
 
     @PutMapping("/school/modify-route")
-    public ResponseEntity<?> modifyRoute(@RequestBody ModifyRouteReq modifyRouteReq) {
+    public ResponseEntity<RouteResponse> modifyRoute(@RequestBody ModifyRouteReq modifyRouteReq) {
 
         Route route = routeRepo.findById(modifyRouteReq.getRouteId()).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
 
@@ -118,11 +124,13 @@ public class SchoolController {
         route.setBusId(modifyRouteReq.getBusId());
         route.setPolyline(modifyRouteReq.getPolyline());
 
-        return ResponseEntity.ok(routeRepo.save(route));
+        RouteResponse routeResponse = new RouteResponse(route.getId(), route.getName(), route.getBusId(), route.getPolyline(), route.getSchool().getId(), ConvertorUtils.convertToStopModel(route.getStops()));
+
+        return ResponseEntity.ok(routeResponse);
     }
 
     @GetMapping("/school/delete-route")
-    public ResponseEntity<?> deleteRoute(@RequestParam Long routeId) {
+    public ResponseEntity<String> deleteRoute(@RequestParam Long routeId) {
 
         routeRepo.findById(routeId).orElseThrow(() -> new RuntimeException("Invalid RouteId"));
 
