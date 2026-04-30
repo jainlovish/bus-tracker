@@ -3,6 +3,7 @@ package com.tracking.busbackend.controller;
 import com.tracking.busbackend.entity.*;
 import com.tracking.busbackend.model.driver.AddDriverRequest;
 import com.tracking.busbackend.model.driver.DriverRouteChangeReq;
+import com.tracking.busbackend.model.parent.AddParentRequest;
 import com.tracking.busbackend.model.route.CreateRouteReq;
 import com.tracking.busbackend.model.route.ModifyRouteReq;
 import com.tracking.busbackend.model.route.RouteResponse;
@@ -86,11 +87,19 @@ public class SchoolController {
     }
 
     @PostMapping("/school/add-parent")
-    public ResponseEntity<?> createParent(@RequestBody Parent parent) {
+    public ResponseEntity<String> createParent(@RequestBody AddParentRequest addParentRequest) {
 
-        parent.setPassword(passwordEncoder.encode(parent.getPassword()));
+        School school = schoolRepo.findById(addParentRequest.getSchoolId()).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
-        return ResponseEntity.ok(parentRepository.save(parent));
+        Parent parent = new Parent();
+        parent.setName(addParentRequest.getName());
+        parent.setEmail(addParentRequest.getEmail());
+        parent.setMobile(addParentRequest.getMobile());
+        parent.setPassword(passwordEncoder.encode(addParentRequest.getPassword()));
+        parent.setIsActive(true);
+        parent.setSchool(school);
+
+        return ResponseEntity.ok("Parent saved successfully");
     }
 
     @GetMapping("/school/delete-parent")

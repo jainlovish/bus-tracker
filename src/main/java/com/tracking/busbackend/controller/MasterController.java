@@ -1,6 +1,8 @@
 package com.tracking.busbackend.controller;
 
 import com.tracking.busbackend.entity.*;
+import com.tracking.busbackend.model.driver.DriverResponse;
+import com.tracking.busbackend.model.parent.ParentResponse;
 import com.tracking.busbackend.model.route.RouteResponse;
 import com.tracking.busbackend.model.school.SchoolResponse;
 import com.tracking.busbackend.model.stop.StopModel;
@@ -86,19 +88,37 @@ public class MasterController {
     }
 
     @GetMapping("/drivers-by-school")
-    public ResponseEntity<List<Driver>> getDriversBySchool(@RequestParam Long schoolId){
+    public ResponseEntity<List<DriverResponse>> getDriversBySchool(@RequestParam Long schoolId){
 
         School school = schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
-        return ResponseEntity.ok(school.getDrivers());
+        List<Driver> driverList = school.getDrivers();
+
+        List<DriverResponse> driverResponses = new ArrayList<>();
+
+        driverList.forEach(d -> {
+            DriverResponse driverResponse = new DriverResponse(d.getId(), d.getName(), d.getMobile(), d.getEmail(), d.getPassword(), d.getIsActive(), d.getRouteId(), schoolId);
+            driverResponses.add(driverResponse);
+        });
+
+        return ResponseEntity.ok(driverResponses);
     }
 
     @GetMapping("/parents-by-school")
-    public ResponseEntity<List<Parent>> getParentsBySchool(@RequestParam Long schoolId){
+    public ResponseEntity<List<ParentResponse>> getParentsBySchool(@RequestParam Long schoolId){
 
         School school = schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
-        return ResponseEntity.ok(school.getParents());
+        List<Parent> parentList = school.getParents();
+
+        List<ParentResponse> parentResponses = new ArrayList<>();
+
+        parentList.forEach(d -> {
+            ParentResponse parentResponse = new ParentResponse(d.getId(), d.getName(), d.getEmail(), d.getMobile(), d.getPassword(), d.getIsActive(), schoolId);
+            parentResponses.add(parentResponse);
+        });
+
+        return ResponseEntity.ok(parentResponses);
     }
 
     private List<SchoolResponse> convertToSchoolResponse(List<School> schoolList){
