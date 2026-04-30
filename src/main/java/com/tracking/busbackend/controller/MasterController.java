@@ -1,6 +1,8 @@
 package com.tracking.busbackend.controller;
 
 import com.tracking.busbackend.entity.*;
+import com.tracking.busbackend.model.route.RouteResponse;
+import com.tracking.busbackend.model.stop.StopModel;
 import com.tracking.busbackend.repository.RouteRepo;
 import com.tracking.busbackend.repository.SchoolRepo;
 import com.tracking.busbackend.repository.StopRepo;
@@ -31,11 +33,13 @@ public class MasterController {
     }
 
     @GetMapping("/routes-by-school")
-    public ResponseEntity<List<Route>> getRoutesBySchool(@RequestParam Long schoolId) {
+    public ResponseEntity<List<RouteResponse>> getRoutesBySchool(@RequestParam Long schoolId) {
 
         schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
-        return ResponseEntity.ok(routeRepo.findBySchoolId(schoolId));
+        List<RouteResponse> routeResponse = mapRouteResponse(routeRepo.findBySchoolId(schoolId));
+
+        return ResponseEntity.ok(routeResponse);
     }
 
     @GetMapping("/route/{id}")
@@ -82,6 +86,32 @@ public class MasterController {
         School school = schoolRepo.findById(schoolId).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
 
         return ResponseEntity.ok(school.getParents());
+    }
+
+    private List<RouteResponse> mapRouteResponse(List<Route> routeList){
+
+        List<RouteResponse> routeResponses = new ArrayList<>();
+        routeList.forEach(r -> {
+              RouteResponse routeResponse = new RouteResponse();
+              routeResponse.setRouteId(r.getId());
+              routeResponse.setName(r.getName());
+              routeResponse.setPolyline(r.getPolyline());
+              routeResponse.setBusId(r.getBusId());
+              routeResponse.setSchoolId(r.getSchool().getId());
+              routeResponse.setStops(convertToStopModel(r.getStops()));
+
+              routeResponses.add(routeResponse);
+        });
+        return routeResponses;
+    }
+
+    private List<StopModel> convertToStopModel(List<Stop> stopList){
+        List<StopModel> stopModelList = new ArrayList<>();
+        stopList.forEach(s -> {
+            StopModel stopModel = new StopModel(s.getName(), s.getLat(), s.getLng(), s.getSequenceNo());
+            stopModelList.add(stopModel);
+        });
+        return stopModelList;
     }
 
 }

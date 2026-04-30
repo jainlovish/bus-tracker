@@ -9,6 +9,7 @@ import com.tracking.busbackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -99,6 +100,8 @@ public class SchoolController {
         route.setBusId(createRouteReq.getBusId());
         route.setSchool(school);
 
+        routeRepo.save(route);
+
         mapStops(route, createRouteReq.getStops());
 
         return ResponseEntity.ok(routeRepo.save(route));
@@ -132,7 +135,9 @@ public class SchoolController {
 
         List<Stop> stopsList = route.getStops();
 
-        stopsList.forEach(stop -> stopRepo.deleteById(stop.getId()));
+        if(!CollectionUtils.isEmpty(stopsList)) {
+            stopsList.forEach(stop -> stopRepo.deleteById(stop.getId()));
+        }
 
         stopModelList.stream().forEach(s -> {
             Stop stop = new Stop();
