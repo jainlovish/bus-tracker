@@ -1,6 +1,7 @@
 package com.tracking.busbackend.controller;
 
 import com.tracking.busbackend.entity.*;
+import com.tracking.busbackend.model.driver.AddDriverRequest;
 import com.tracking.busbackend.model.driver.DriverRouteChangeReq;
 import com.tracking.busbackend.model.route.CreateRouteReq;
 import com.tracking.busbackend.model.route.ModifyRouteReq;
@@ -39,11 +40,22 @@ public class SchoolController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/school/add-driver")
-    public ResponseEntity<?> createDriver(@RequestBody Driver driver) {
+    public ResponseEntity<String> createDriver(@RequestBody AddDriverRequest addDriverRequest) {
 
-        driver.setPassword(passwordEncoder.encode(driver.getPassword()));
+        Driver driver = new Driver();
 
-        return ResponseEntity.ok(driverRepository.save(driver));
+        driver.setName(addDriverRequest.getName());
+        driver.setPassword(passwordEncoder.encode(addDriverRequest.getPassword()));
+        driver.setEmail(addDriverRequest.getEmail());
+        driver.setRouteId(addDriverRequest.getRouteId());
+        driver.setMobile(addDriverRequest.getMobile());
+        driver.setIsActive(true);
+
+        School school = schoolRepo.findById(addDriverRequest.getSchoolId()).orElseThrow(() -> new RuntimeException("Invalid SchoolId"));
+
+        driver.setSchool(school);
+
+        return ResponseEntity.ok("Driver saved successfully");
     }
 
     @PostMapping("/school/change-driver-route")
