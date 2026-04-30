@@ -56,6 +56,8 @@ public class SchoolController {
 
         driver.setSchool(school);
 
+        driverRepository.save(driver);
+
         return ResponseEntity.ok("Driver saved successfully");
     }
 
@@ -98,6 +100,8 @@ public class SchoolController {
         parent.setPassword(passwordEncoder.encode(addParentRequest.getPassword()));
         parent.setIsActive(true);
         parent.setSchool(school);
+
+        parentRepository.save(parent);
 
         return ResponseEntity.ok("Parent saved successfully");
     }
